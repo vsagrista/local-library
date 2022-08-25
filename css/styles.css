@@ -9,7 +9,6 @@ html, body {
 
 .main {
     display: flex;
-    background: orange;
     height: 100%;
     align-items: center;
     justify-content: space-around;
@@ -18,20 +17,25 @@ html, body {
 .side-page-panel {
     width: 100%;
     height: 100%;
+}
+
+.left-panel, .right-panel h2 {
     padding-left: 10px;
 }
 
-.left-panel {
+.left-panel, .right-panel {
     background-color: aliceblue;
 }
 
-.right-panel {
-    background-color: lightgray;
-}
+
 
 @media only screen and (max-width: 768px) {
+    body {
+        overflow: auto;
+    }
     .main {
         flex-direction: column;
         text-align: center;
+        justify-content: flex-start;
     }
 }
