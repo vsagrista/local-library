@@ -54,27 +54,43 @@ let myLibrary = new Library;
 // DOM functions
 
 function deleteBook(e) {
-    let id = parseInt(e.target.id.split('-')[1]);
-    myLibrary.removeBookFromCollection(id);
+
+    // num from id is the same as book object's id
+    let bookId = parseInt(e.target.id.split('-')[1]);
+    myLibrary.removeBookFromCollection(bookId);
     
     cleanLibrary();
     loadBooksForDOM(myLibrary.books);
 }
 
-function cleanLibrary() {
-    document.querySelector('#book-list').innerHTML = '';
+
+function changeBookStatus(e) {
+
+    // num from id is the same as book object's id
+    let bookId = parseInt(e.target.id.split('-')[1]);
+    myLibrary.toggleRead(bookId);
+
+
+    let readClass = myLibrary.books.find((book) => book.id === bookId).read
+        ? 'done_all' 
+        : 'access_time';
+    document.getElementById(e.target.id).textContent = readClass;
 }
+    
 
 function addBookToDOM(book) {
     let readClass = book.read ? 'done_all' : 'access_time';
 
     const listedItem = generateDomElement('li', 'collection-item avatar', '', book.id);
-    const readIcon   = generateDomElement('i', 'material-icons circle toggle-read', readClass, `read-icon-${ book.id}`);
+    const readIcon   = generateDomElement('i', 'material-icons circle toggle-read', readClass, `isread-${ book.id}`);
     const paragraph1 = generateDomElement('p', 'title', book.title, `first-p-${ book.id}`);
     const paragraph2 = generateDomElement('p', 'secondary-title', book.author, `second-p-${ book.id}`);
     const paragraph3 = generateDomElement('p', 'secondary-title', book.pages, `third-p-${ book.id}`);
     const deleteIcon = generateDomElement('i', 'material-icons delete-icon', 'delete', `delete-${ book.id}`);
 
+    // add toggle read functionality to icon
+    readIcon.addEventListener('click', changeBookStatus);
+    
     // add remove book functionality to icon
     deleteIcon.addEventListener('click', deleteBook);
 
@@ -83,10 +99,7 @@ function addBookToDOM(book) {
     document.getElementById(book.id).append(paragraph1);
     document.getElementById(book.id).append(paragraph2);
     document.getElementById(book.id).append(paragraph3);
-    document.getElementById(book.id).append(deleteIcon);
-
-    //document.getElementsByClassName('delete-icon').addEventListener('click', deleteBook);
-    
+    document.getElementById(book.id).append(deleteIcon);    
 }
 
 function loadBooksForDOM(books) {
@@ -122,6 +135,10 @@ function addBookToLibrary() {
 
     // print in DOM
     addBookToDOM(book);
+}
+
+function cleanLibrary() {
+    document.querySelector('#book-list').innerHTML = '';
 }
 
 window.addEventListener('DOMContentLoaded', () => {
