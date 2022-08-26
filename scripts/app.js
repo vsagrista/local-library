@@ -1,4 +1,6 @@
-let myLibrary = [
+// Dummy Data
+
+let dummyData = [
     { 
         id: 1,
         title: 'Harry Potter and the Sorcerer\'s Stone',
@@ -15,7 +17,7 @@ let myLibrary = [
     }
 ];
 
-const listHtmlContent = (book) => (`<i class="material-icons circle">done_all</i><span class="title">${ book.title }</span><p>${ book.author }<br>Pages: ${ book.pages }</p><a href="#!" class="secondary-content delete-book"><i class="material-icons">delete</i></a>`);
+// Data management
 
 class Book {
     constructor(id, title, author, pages, read) {
@@ -27,44 +29,106 @@ class Book {
     }
 }
 
-function addBookToLibrary() {
-    let id = myLibrary.length + 1;
-    let title = this.event.target.elements[0].value;
-    let author = this.event.target.elements[1].value;
-    let pages = this.event.target.elements[2].value;
-    let read = this.event.target.elements[3].checked
+class Library {
+    constructor() {
+        this.books = [];
+    }
 
-    let newBook = new Book(id, title, author, pages, read);
-    myLibrary.push(newBook);
+    addBook(book) {
+        let newBook = new Book(book.id, book.title, book.author, book.pages, book.read);
+        this.books.push(newBook);
+    } 
 
-    cleanLibrary();
-    loadLibrary();
+    removeBookFromCollection(id) {
+        this.books = this.books.filter((book) => book.id !== id)
+    }
+
+    toggleRead(id) {
+        let bookIndex = this.books.findIndex(book => book.id == id);
+        this.books[bookIndex].read = !this.books[bookIndex].read;
+    }
 }
 
-function removeFromLibrary() {
-    myLibrary = myLibrary.filter((item) => item.id !== parseInt(this.parentElement.id));
+let myLibrary = new Library;
 
+// DOM functions
+
+function deleteBook(e) {
+    let id = parseInt(e.target.id.split('-')[1]);
+    myLibrary.removeBookFromCollection(id);
+    
     cleanLibrary();
-    loadLibrary();
+    loadBooksForDOM(myLibrary.books);
 }
 
 function cleanLibrary() {
     document.querySelector('#book-list').innerHTML = '';
 }
 
-function loadLibrary() {
-    myLibrary.forEach((book) => {
-        let listedItem = document.createElement( 'li' );
-        listedItem.classList = 'collection-item avatar';
-        listedItem.id = book.id;
-        listedItem.innerHTML = listHtmlContent(book);
-        document.querySelector('#book-list').append(listedItem);
-    })
+function addBookToDOM(book) {
+    let readClass = book.read ? 'done_all' : 'access_time';
+
+    const listedItem = generateDomElement('li', 'collection-item avatar', '', book.id);
+    const readIcon   = generateDomElement('i', 'material-icons circle toggle-read', readClass, `read-icon-${ book.id}`);
+    const paragraph1 = generateDomElement('p', 'title', book.title, `first-p-${ book.id}`);
+    const paragraph2 = generateDomElement('p', 'secondary-title', book.author, `second-p-${ book.id}`);
+    const paragraph3 = generateDomElement('p', 'secondary-title', book.pages, `third-p-${ book.id}`);
+    const deleteIcon = generateDomElement('i', 'material-icons delete-icon', 'delete', `delete-${ book.id}`);
+
+    // add remove book functionality to icon
+    deleteIcon.addEventListener('click', deleteBook);
+
+    document.getElementById('book-list').append(listedItem);
+    document.getElementById(book.id).append(readIcon);
+    document.getElementById(book.id).append(paragraph1);
+    document.getElementById(book.id).append(paragraph2);
+    document.getElementById(book.id).append(paragraph3);
+    document.getElementById(book.id).append(deleteIcon);
+
+    //document.getElementsByClassName('delete-icon').addEventListener('click', deleteBook);
+    
+}
+
+function loadBooksForDOM(books) {
+    books.forEach((book) => addBookToDOM(book));
     document.querySelectorAll('.delete-book').forEach((deleteBtn) => deleteBtn.addEventListener('click', removeFromLibrary));
 }
 
+function generateDomElement(type, classList, textContent, id) {
+    let domElement = document.createElement(type);
+    domElement.classList = classList;
+    domElement.textContent = textContent;
+    domElement.id = id;
+    return domElement;
+}
+
+function addBookToLibrary() {
+    let id = myLibrary.books.length > 0 ? myLibrary.books[myLibrary.books.length - 1].id + 1 : 1;
+    let title = document.getElementById('title').value;
+    let author = document.getElementById('author').value;
+    let pages = parseInt(document.getElementById('pages').value);
+    let read = document.getElementById('is-read').checked;
+
+    let book = {
+        id,
+        title,
+        author,
+        pages,
+        read,
+    };
+
+    // save in collection of objects - library
+    myLibrary.addBook(book);
+
+    // print in DOM
+    addBookToDOM(book);
+}
+
 window.addEventListener('DOMContentLoaded', () => {
-    loadLibrary();
+    myLibrary.addBook(dummyData[0]);
+    myLibrary.addBook(dummyData[1]);
+    loadBooksForDOM(myLibrary.books);
 });
+
 
 
